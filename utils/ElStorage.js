@@ -62,7 +62,7 @@ class ElStorage {
                 let initialData = {
                     name: databaseName,
                     createdOn: new Date().toJSON(),
-                    // updatedOn: new Date().toJSON(), // Optional
+                    updatedOn: new Date().toJSON(), // Optional
                     totalFolders: 0,
                     data: {}
                 }
@@ -100,6 +100,18 @@ class ElStorage {
             catch (err) {
                 reject(err);
             }
+        })
+    }
+
+    async updateDatabase(databaseData) {
+        return new Promise((resolve, reject) => {
+            if (typeof databaseData !== 'string') {
+                reject(new ParameterTypeError(`databaseData must be a string, not a ${typeof databaseData}`));
+                return;
+            }
+            databaseData?.updatedOn = new Date().toJSON();
+            this.databaseData = databaseData;
+            resolve({message: 'Successfully Updated Database!', data: databaseData});
         })
     }
 
@@ -302,7 +314,17 @@ class ElStorage {
         })
     }
 
-    async addObjectByPath(pathString, obj = {}) {
+    /**
+     * Sets an object property data through path
+     * 
+     * Can be used for Updating and Adding Data
+     * @param {string} path 
+     * @param {string} propertyName 
+     * @param {string} dataString 
+     * @param {object} obj 
+     * @returns 
+     */
+    async setObjectByPath(path, propertyName, dataString, obj = this.databaseData) {
         return new Promise((resolve, reject) => {
             if (typeof dataName !== 'string') {
                 reject(new ParameterTypeError(`dataName must be a string, not a ${typeof dataName}`));
@@ -323,7 +345,7 @@ class ElStorage {
             let pathParts = pathString.split(/[\/\\]/);
 
             // Pass obj into a temporary variable
-            let dataObj = obj;
+            let dataObj = obj['data'];
 
             for (const step of steps) {
                 dataObj = dataObj[step];
@@ -334,6 +356,9 @@ class ElStorage {
                     break;
                 }
             }
+
+            dataObj[propertyName] = dataString;
+            this.updateDatabase(dataObj);
 
             if (dataObj !== null) {
                 resolve({
@@ -349,6 +374,8 @@ class ElStorage {
         })
     }
 
+
+
     /**
      * 
      * @param {string} modelName 
@@ -361,7 +388,7 @@ class ElStorage {
                 return;
             }
 
-            resolve(new ElStorageModel(this.databaseName, modelName, modelPath, this.findObjectByPath))
+            resolve(new ElStorageModel(this.databaseName, modelName, modelPath, this.findObjectByPath, this.setObjectByPath))
         })
     }
 }
@@ -374,7 +401,7 @@ class ElStorageModel {
         super({ functions });
 
 
-
+        this.path = modelPath;
         this.databaseName = databaseName;
         this.modelName = modelName;
     }
