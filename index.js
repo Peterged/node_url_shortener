@@ -21,14 +21,14 @@ app.use(bodyParser.urlencoded({
 }))
 
 // Needs Session
-app.use(
-    flash.default({
-        sessionKeyName: 'express-flash-message',
-        // below are optional property you can pass in to track
-        onAddFlash: (type, message) => { },
-        onConsumeFlash: (type, messages) => { },
-    })
-);
+// app.use(
+//     flash.default({
+//         sessionKeyName: 'express-flash-message',
+//         // below are optional property you can pass in to track
+//         onAddFlash: (type, message) => { },
+//         onConsumeFlash: (type, messages) => { },
+//     })
+// );
 
 
 // Port

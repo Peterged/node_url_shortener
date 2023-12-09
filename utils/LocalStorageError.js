@@ -43,8 +43,12 @@ class ApplicationError extends Error {
 
 class DatabaseError extends ApplicationError {
     ErrorType = {
+        // DATABASE RELATED
         NONEXISTENT_DATABASE: 'NONEXISTENT_DATABASE',
         DATABASE_EXISTS: 'DATABASE_EXISTS'
+
+        // DATA RELATED
+        NONEXISTENT_DATA: 'NONEXISTENT_DATA'
     }
 
     handleDatabaseError(error) {
@@ -60,10 +64,17 @@ class DatabaseError extends ApplicationError {
         }
     }
 }
-
+// DATABASE RELATED
 class NonexistentDatabaseError extends DatabaseError {
     constructor(databaseName){
         super(`Database ${databaseName} does not exist!`, 'NONEXISTENT_DATABASE', ErrorSeverity.CRITICAL);
+    }
+}
+
+// USER RELATED
+class NonexistentDataError extends DatabaseError {
+    constructor(dataName) {
+        super(`${dataName} data does not exist!`, 'NONEXISTENT_DATA', ErrorSeverity.CRITICAL);
     }
 }
 
@@ -109,4 +120,4 @@ class NetworkError extends ApplicationError {}
 
 
 
-module.exports = { ApplicationError, NonexistentDatabaseError, ParameterTypeError, ErrorSeverity }
+module.exports = { ApplicationError, NonexistentDatabaseError, NonexistentDataError, ParameterTypeError, ErrorSeverity }

@@ -5,6 +5,8 @@ router.get('/', (req, res) => {
     res.render('home', {
         welcomeMessage: 'This is the Landing Page'
     });
+
+    console.log(req)
 })
 
 // STATUS ERROR CODE HANDLING

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const app = express();
 
 // LOGIN
 router.get('/login', (req, res) => {
@@ -18,6 +19,7 @@ router.get('/login', (req, res) => {
     // Body is from the POST Request
     console.log(req.query)
 })
+
 
 router.post('/login', (req, res) => {
     res.render('auth/login')
