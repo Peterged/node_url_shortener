@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1><%= locals.formTitle || 'LOGIN FORM' %></h1>
+    <form action="./login" method="post" enctype="multipart/form-data">
+        <!-- <input type="email" name="email" title="email" placeholder="Email...." autofocus> <br> -->
+        <input type="text" name="username" title="username" placeholder="Username..." autocomplete="off" autofocus> <br>
+        <!-- <input type="password" name="password" title="password" placeholder="Password..." autocomplete="off"> <br> -->
+        <!-- <label for="DATE"></label> -->
+        <!-- <input type="date" name="date_test" id="DATE" title="date-test"> <br> -->
+        <!-- <input type="file" title="file_input" name="file_input"> <br> -->
+        <input type="submit" name="submit" value="send"> <br>
+    </form>
+    <h1><a href="/register">REGISTER HERE</a></h1>
+
+    <h1>Your name is: <%= locals.formData && locals.formData.username || '' %></h1>
+</body>
+</html>
