@@ -44,11 +44,11 @@ class ApplicationError extends Error {
 class DatabaseError extends ApplicationError {
     ErrorType = {
         // DATABASE RELATED
-        NONEXISTENT_DATABASE: 'NONEXISTENT_DATABASE',
-        DATABASE_EXISTS: 'DATABASE_EXISTS'
+        nonexistent_database: 'NONEXISTENT_DATABASE',
+        database_exists: 'DATABASE_EXISTS',
 
         // DATA RELATED
-        NONEXISTENT_DATA: 'NONEXISTENT_DATA'
+        nonexistent_data: 'NONEXISTENT_DATA'
     }
 
     handleDatabaseError(error) {
@@ -87,7 +87,7 @@ class NonexistentDataError extends DatabaseError {
 
 class UserError extends ApplicationError {
     ErrorType = {
-        INVALID_PARAMETER: 'INVALID_PARAMETER'
+        invalid_parameter: 'INVALID_PARAMETER'
     }
 
     handleUserError(error) {
@@ -101,7 +101,7 @@ class UserError extends ApplicationError {
 
 class ParameterTypeError extends UserError {
     constructor(message) {
-        super(message, this.ErrorType.INVALID_PARAMETER, ErrorSeverity.CRITICAL);
+        super(message,  new UserError().ErrorType.invalid_parameter, ErrorSeverity.CRITICAL);
     }
 }
 

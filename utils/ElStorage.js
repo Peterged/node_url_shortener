@@ -1,7 +1,16 @@
 const { ApplicationError, NonexistentDatabaseError, ParameterTypeError } = require("./LocalStorageError");
 const path = require('path');
+const { validatePath } = require("./Validation");
+
+if (typeof localStorage === "undefined" || localStorage === null) {
+    var LocalStorage = require('node-localstorage').LocalStorage;
+    var localStorage = new LocalStorage('./based');
+}
 
 class ElStorage {
+    databaseData = {}
+    databaseName;
+
     constructor(databaseName) {
         if (typeof databaseName !== 'string') {
             throw new ParameterTypeError(`databaseName must be a string, not a ${typeof databaseName}`);
@@ -12,29 +21,59 @@ class ElStorage {
         }
 
         try {
-            let exists = await this.databaseExists(databaseName);
-            if (!exists) {
-                await this.createDatabase(databaseName);
-            }
+            this.setDatabaseName(databaseName);
+            (async () => {
+                let currentData = await this.getDatabase();
 
-            this.databaseName = databaseName;
+                if (!await this.databaseExists(databaseName)) {
+                    await this.createDatabase(databaseName);
+                }
 
-            this.databaseData = this._updateDatabaseVariable();
-        }
-        catch (err) {
+                this.setDatabaseData(currentData);
+
+                console.log('ElStorage Initialized');
+            })();
+        } catch (err) {
             console.error(err);
         }
+        this._updateDatabaseVariable();
     }
+
+    setDatabaseName = (databaseName) => {
+        if (typeof databaseName !== 'string') {
+            throw new ParameterTypeError(`databaseName must be a string.`);
+        }
+
+        this.databaseName = databaseName;
+    }
+
+    setDatabaseData = (databaseData) => {
+        if (typeof databaseData !== 'object') {
+            throw new ParameterTypeError(`databaseData must be a string.`);
+        }
+
+        this.databaseData = databaseData;
+    }
+
+    getDatabaseName = () => {
+        return this.databaseName || null;
+    };
+
+    getDatabaseData = () => {
+        return this.databaseData || null;
+    };
 
     /**
      * 
      * @returns 
      */
-    async _updateDatabaseVariable() {
-        return new Promise((resolve, reject) => {
+    _updateDatabaseVariable() {
+        return new Promise(async (resolve, reject) => {
             try {
-                this.databaseData = this.getDatabase(this.databaseName);
+                // console.log(this.databaseData)
+                this.databaseData = await this.getDatabase();
                 console.log(`Completed Database Update!`);
+                resolve(`Completed Database Update`)
             }
             catch (err) {
                 reject(err);
@@ -45,30 +84,37 @@ class ElStorage {
     /**
      * Creates a new database with the localStorage API
      * @param {string} databaseName
+     * @return {{message: string, databaseName: string}}
      */
-    async createDatabase(databaseName) {
+    createDatabase(databaseName) {
         return new Promise((resolve, reject) => {
             try {
                 // Checks an existing database with the name given
-                let exists = await this.databaseExists(databaseName);
-                if (!exists) {
-                    reject(new LocalStorageError({
-                        message: `Database ${databaseName} exist!`,
-                        error: 'Database Overwrite Attempt'
-                    }))
-                    return;
-                }
-                // Sets up initial data to be given at the database
-                let initialData = {
-                    name: databaseName,
-                    createdOn: new Date().toJSON(),
-                    updatedOn: new Date().toJSON(), // Optional
-                    totalFolders: 0,
-                    data: {}
-                }
+                this.databaseExists(databaseName).then(exists => {
+                    if (exists) {
+                        // console.warn(`Database Overwrite Attempt!`)
+                        // throw new Error({
+                        //     message: `Database ${databaseName} exist!`,
+                        //     error: 'Database Overwrite Attempt'
+                        // })
 
-                // Sets a template for the new database
-                await localStorage.setItem(databaseName, JSON.stringify(initialData));
+                    }
+                    else {
+                        // Sets up initial data to be given at the database
+                        let initialData = {
+                            name: databaseName,
+                            createdOn: new Date().toJSON(),
+                            updatedOn: new Date().toJSON(), // Optional
+                            totalKeys: 0,
+                            data: {}
+                        }
+
+                        // Sets a template for the new database
+                        localStorage.setItem(databaseName, JSON.stringify(initialData));
+                        resolve({ message: 'Successfully created a new database!', databaseName })
+                    }
+
+                })
             }
             catch (err) {
                 reject(err);
@@ -78,11 +124,13 @@ class ElStorage {
     }
 
     /**
-     * Sets your database
+     * Sets / Replaces your working database for the current class
+     * 
      * @param {string} databaseName
+     * @return {{message: string, status: string}}
      */
-    async setDatabase(databaseName) {
-        return new Promise((resolve, reject) => {
+    setDatabase(databaseName) {
+        return new Promise(async (resolve, reject) => {
             if (typeof databaseName !== 'string') {
                 reject(new ParameterTypeError(`databaseName should be a string, not a ${typeof databaseName}`));
                 return;
@@ -93,9 +141,11 @@ class ElStorage {
                 if (!exists) {
                     reject(new NonexistentDatabaseError(databaseName));
                 }
-
-                console.log(`Moved database from ${this.databaseName} to ${databaseName}`);
+                let message = `Moved database from ${this.databaseName} to ${databaseName}`;
+                console.log(message);
                 this.databaseName = databaseName;
+
+                resolve({ message, status: 'Success' });
             }
             catch (err) {
                 reject(err);
@@ -103,57 +153,69 @@ class ElStorage {
         })
     }
 
-    async updateDatabase(databaseData) {
-        return new Promise((resolve, reject) => {
+    /**
+     * Updates the database and the `updatedOn` property
+     * 
+     * @param {string} databaseData 
+     * @returns {{message: string, data: object}}
+     */
+    updateDatabase(databaseData) {
+        return new Promise(async (resolve, reject) => {
             if (typeof databaseData !== 'string') {
                 reject(new ParameterTypeError(`databaseData must be a string, not a ${typeof databaseData}`));
                 return;
             }
-            databaseData?.updatedOn = new Date().toJSON();
+            databaseData['updatedOn'] = new Date().toJSON();
             this.databaseData = databaseData;
-            resolve({message: 'Successfully Updated Database!', data: databaseData});
+            resolve({ message: 'Successfully Updated Database!', data: databaseData });
         })
     }
 
     /**
      * Checks if a specific database exists
      * @param {string} databaseName 
-     * @returns 
+     * @returns {bool}
      */
-    async databaseExists(databaseName) {
-        return new Promise((resolve, reject) => {
+    databaseExists(databaseName) {
+        return new Promise(async (resolve, reject) => {
             if (typeof databaseName !== 'string') {
                 reject(new ParameterTypeError(`databaseName must be a string, not a ${typeof databaseName}`));
             }
             let exists = JSON.parse(localStorage.getItem(databaseName));
             if (exists !== null) {
-                console.log(`Database ${databaseName} exist!`);
+                // console.log(`Database ${databaseName} exist!`);
                 resolve(true);
             }
             else {
-                console.log(`Database ${databaseName} does not exist!`);
+                // console.log(`Database ${databaseName} does not exist!`);
                 resolve(false);
             }
         })
     }
 
     /**
-     * Returns a database
-     * @param {string} databaseName 
-     * @returns 
+     * Returns database data by getting it through its name
+     * 
+     * @param {string} [databaseName]
+     * @returns {object} 
      */
-    async getDatabase(databaseName) {
+    getDatabase = async (databaseName) => {
         return new Promise(async (resolve, reject) => {
+            if (databaseName === undefined) {
+                databaseName = this.getDatabaseName();
+            }
+
             if (typeof databaseName !== 'string') {
-                reject(new ParameterTypeError(`databaseName must be a string, not a ${typeof databaseName}`));
+                reject(new ParameterTypeError(`databaseName must be a string, not ${typeof databaseName}`));
                 return;
             }
 
             try {
-                let databaseData = JSON.parse(localStorage.getItem(databaseName));
+                let databaseData = await JSON.parse(localStorage.getItem(databaseName));
 
                 if (databaseData === null) {
                     reject(new NonexistentDatabaseError(databaseName));
+                    return;
                 }
                 resolve(databaseData);
             }
@@ -161,15 +223,36 @@ class ElStorage {
                 reject(err);
             }
         })
+    };
+
+    async getAllKeys() {
+        
+        const keys = [];
+        const queue = [this.getDatabaseData()];
+
+        while (queue.length) {
+            const currentObj = queue.shift();
+
+            for (const key in currentObj) {
+                if (typeof currentObj[key] === 'object' && !Array.isArray(currentObj[key])) {
+                    queue.push(currentObj[key]);
+                } else {
+                    keys.push(key);
+                }
+            }
+        }
+
+        return keys;
     }
 
+
     /**
-     * Returns existing data
-     * @param {*} data_name
-     * @returns
+     * Returns existing data from the database
+     * @param {string} dataName
+     * @returns {object}
      */
-    async __getData(dataName) {
-        return new Promise((resolve, reject) => {
+    _getData(dataName) {
+        return new Promise(async (resolve, reject) => {
             // Validate dataName type
             if (typeof dataName !== "string") {
                 reject(new ParameterTypeError(`dataName must be a string, not a ${typeof dataName}`));
@@ -198,30 +281,25 @@ class ElStorage {
 
     /**
      * Sets and Overwrites data
-     * @param {string} data_name
+     * @param {string} dataName
      * @param {any} data
+     * @param {string} [pathName] 
      */
-    async _addData(dataName, data, pathName) {
+    store(dataName, dataString, pathName = "/") {
         return new Promise(async (resolve, reject) => {
-            if (typeof databaseName !== 'string') {
-                reject(new ParameterTypeError(`databaseName must be a string, not a ${typeof databaseName}`));
+            if (typeof dataName !== 'string') {
+                reject(new ParameterTypeError(`dataName must be a string, not a ${typeof databaseName}`));
             }
 
-            let databaseData = await this.getDatabase(this.databaseName);
+
             // Need to add function to write data through path
-
+            let result = await this.setPropertyByPath(pathName, dataName, dataString);
+            resolve(result);
         })
-
-
-
-        let exists = localStorage.setItem(data_name, data);
-        if (exists) {
-            console.log('Data exists and is overwritten!');
-        }
     }
 
-    async __updateData(dataName, data) {
-        return new Promise((resolve, reject) => {
+    _updateProperty(dataName, data) {
+        return new Promise(async (resolve, reject) => {
             if (typeof databaseName !== 'string') {
                 reject(new ParameterTypeError(`databaseName must be a string, not a ${typeof databaseName}`));
                 return;
@@ -235,10 +313,10 @@ class ElStorage {
 
     /**
      * Deletes data from localStorage
-     * @param {string} data_name
+     * @param {string} dataName
      */
-    async deleteData(dataName) {
-        return new Promise((resolve, reject) => {
+    deleteData(dataName) {
+        return new Promise(async (resolve, reject) => {
             if (typeof dataName !== 'string') {
                 reject(new ParameterTypeError(`dataName must be a string, not a ${typeof dataName}`));
             }
@@ -269,19 +347,17 @@ class ElStorage {
      * `E.g. path = images/icons`
      * @param {string} pathString
      * @param {object} obj 
-     * @returns {object} `{message, data}`
+     * @returns {{message: string, data: object}}
      */
-    async findObjectByPath(pathString, obj = {}) {
+    findPropertyByPath(pathString, obj = {}) {
         return new Promise((resolve, reject) => {
             if (typeof dataName !== 'string') {
                 reject(new ParameterTypeError(`dataName must be a string, not a ${typeof dataName}`));
                 return;
             }
-            // Regex to validate the path string
-            let pathRegex = new RegExp("^(?<directory>(?:[a-zA-Z0-9-+()\\[\\]\\{\\}%$#@!,\\.\\'&\\`~_\\-\\=;]+(?<!\\\/?)\\\\{1,2}|\\\/?[a-zA-Z0-9-+()\\[\\]\\{\\}%$#@!,\\.\\'&\\`~\\_\\-\\=;]+?)+)\\\/?(?<filename>[a-zA-Z0-9\\-\\_\\.]+)(?<extension>\\.[a-zA-Z0-9]+)?$", '');
 
-            const isValidPath = pathRegex.test(pathString);
-
+            // Path String Validation Process
+            const isValidPath = validatePath(path);
             if (!isValidPath) {
                 reject(new Error(`Please provide a valid path. Path provided: ${pathString}`));
                 return;
@@ -315,49 +391,62 @@ class ElStorage {
     }
 
     /**
-     * Sets an object property data through path
+     * `Sets an object property data through path`
      * 
      * Can be used for Updating and Adding Data
      * @param {string} path 
      * @param {string} propertyName 
-     * @param {string} dataString 
-     * @param {object} obj 
-     * @returns 
+     * @param {string} propertyData
+     * @param {object} [dataObject] - An Optional Parameter
+     * @return {{message: string, data: object}}
+     * 
+     * @example
+     * 
+     *      setPropertyByPath('images', 'thumbnails', {createdOn: new Date().toJSON()})
      */
-    async setObjectByPath(path, propertyName, dataString, obj = this.databaseData) {
+    setPropertyByPath = (path, propertyName, propertyData, dataObject = {}) => {
+
+        if (JSON.stringify(dataObject) === '{}') {
+
+            console.log(this.databaseData, "setPropertyByPath()");
+        }
+
         return new Promise((resolve, reject) => {
-            if (typeof dataName !== 'string') {
-                reject(new ParameterTypeError(`dataName must be a string, not a ${typeof dataName}`));
+            if (typeof propertyName !== 'string' || typeof path !== 'string') {
+                reject(new ParameterTypeError(`path and propertyName must be a string.`));
                 return;
             }
-            // Regex to validate the path string
-            let pathRegex = new RegExp("^(?<directory>(?:[a-zA-Z0-9-+()\\[\\]\\{\\}%$#@!,\\.\\'&\\`~_\\-\\=;]+(?<!\\\/?)\\\\{1,2}|\\\/?[a-zA-Z0-9-+()\\[\\]\\{\\}%$#@!,\\.\\'&\\`~\\_\\-\\=;]+?)+)\\\/?(?<filename>[a-zA-Z0-9\\-\\_\\.]+)(?<extension>\\.[a-zA-Z0-9]+)?$", '');
 
-            const isValidPath = pathRegex.test(pathString);
-
+            // Path String Validation Process
+            let isValidPath = validatePath(path);
+            if (path === "/" && !isValidPath) isValidPath = true;
             if (!isValidPath) {
                 reject(new Error(`Please provide a valid path. Path provided: ${pathString}`));
                 return;
             }
 
-
             // Split the path to get the folders
-            let pathParts = pathString.split(/[\/\\]/);
+            let pathParts = path.split(/[\/\\]/);
 
             // Pass obj into a temporary variable
-            let dataObj = obj['data'];
+            // console.log(this.databaseData, "setPropertyByPath()")
 
-            for (const step of steps) {
-                dataObj = dataObj[step];
-                if (!dataObj[part]) {
-                    dataObj[part] = {};
-                }
-                if (dataObj === null) {
-                    break;
+            let dataObj = dataObject;
+            if (path !== '/') {
+                dataObj 
+                for (const step of steps) {
+                    dataObj = dataObj[step];
+                    if (!dataObj[part]) {
+                        dataObj[part] = {};
+                    }
+                    if (dataObj === null) {
+                        break;
+                    }
                 }
             }
-
-            dataObj[propertyName] = dataString;
+            else {
+                dataObj['data'][propertyName] = propertyData;
+            }
             this.updateDatabase(dataObj);
 
             if (dataObj !== null) {
@@ -381,24 +470,24 @@ class ElStorage {
      * @param {string} modelName 
      * @returns 
      */
-    async createNewModel(modelName, modelPath) {
-        return new Promise((resolve, reject) => {
+    createNewModel(modelName, modelPath) {
+        return new Promise(async (resolve, reject) => {
             if (typeof dataName !== 'string') {
                 reject(new ParameterTypeError(`modelName must be a string, not a ${typeof modelName}`));
                 return;
             }
 
-            resolve(new ElStorageModel(this.databaseName, modelName, modelPath, this.findObjectByPath, this.setObjectByPath))
+            resolve(new ElStorageModel(this.databaseName, modelName, modelPath))
         })
     }
 }
 
 class ElStorageModel {
-    constructor(databaseName, modelName, modelPath, ...functions) {
+    constructor(databaseName, modelName, modelPath) {
         if (typeof databaseName !== 'string' || typeof modelName !== 'string') {
             throw new ParameterTypeError(`Both databaseName and modelName must be a string!`);
         }
-        super({ functions });
+
 
 
         this.path = modelPath;
@@ -406,7 +495,7 @@ class ElStorageModel {
         this.modelName = modelName;
     }
 
-    async _addData(dataName, data, path) {
+    async store(dataName, data, path) {
         return new Promise(async (resolve, reject) => {
             let databaseData = await this.getDatabase(this.databaseName);
 
@@ -421,5 +510,11 @@ class ElStorageModel {
         }
     }
 }
+
+// Pass in functions from ElStorage class to the ElStorageModel class
+// To reduce code length
+Object.assign(ElStorageModel.prototype, { setPropertyByPath: ElStorage.prototype.setPropertyByPath })
+Object.assign(ElStorageModel.prototype, { findPropertyByPath: ElStorage.prototype.findPropertyByPath })
+Object.assign(ElStorageModel.prototype, { getDatabase: ElStorage.prototype.getDatabase })
 
 module.exports = ElStorage;
