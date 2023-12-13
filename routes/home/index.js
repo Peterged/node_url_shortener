@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express'
 const router = express.Router();
-const assert = require('assert');
+
+// import assert from 'assert';
 
 
 
@@ -24,6 +25,7 @@ router.get('/', (req, res, next) => {
 router.all('/', (req, res, next) => {
     // 404
     res.status(404).render('errors/404');
+    next();
 })
 
 

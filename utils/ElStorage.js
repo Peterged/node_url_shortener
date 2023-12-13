@@ -1,9 +1,9 @@
-const { ApplicationError, NonexistentDatabaseError, ParameterTypeError } = require("./LocalStorageError");
-const path = require('path');
-const { validatePath } = require("./Validation");
+import { NonexistentDatabaseError, ParameterTypeError } from './LocalStorageError'
+import path from 'path'
+import { validatePath } from './Validation'
 
 if (typeof localStorage === "undefined" || localStorage === null) {
-    var LocalStorage = require('node-localstorage').LocalStorage;
+    var LocalStorage = import('node-localstorage').LocalStorage;
     var localStorage = new LocalStorage('./based');
 }
 
@@ -68,7 +68,7 @@ class ElStorage {
      * @returns 
      */
     _updateDatabaseVariable() {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             try {
                 // console.log(this.databaseData)
                 this.databaseData = await this.getDatabase();
@@ -130,7 +130,7 @@ class ElStorage {
      * @return {{message: string, status: string}}
      */
     setDatabase(databaseName) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (typeof databaseName !== 'string') {
                 reject(new ParameterTypeError(`databaseName should be a string, not a ${typeof databaseName}`));
                 return;
@@ -160,7 +160,7 @@ class ElStorage {
      * @returns {{message: string, data: object}}
      */
     updateDatabase(databaseData) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (typeof databaseData !== 'object') {
                 reject(new ParameterTypeError(`databaseData must be a object, not a ${typeof databaseData}`));
                 return;
@@ -178,7 +178,7 @@ class ElStorage {
      * @returns {bool}
      */
     databaseExists(databaseName) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (typeof databaseName !== 'string') {
                 reject(new ParameterTypeError(`databaseName must be a string, not a ${typeof databaseName}`));
             }
@@ -201,7 +201,7 @@ class ElStorage {
      * @returns {object} 
      */
     getDatabase = async (databaseName) => {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (databaseName === undefined) {
                 databaseName = this.getDatabaseName();
             }
@@ -253,7 +253,7 @@ class ElStorage {
      * @returns {object}
      */
     _getData(dataName) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             // Validate dataName type
             if (typeof dataName !== "string") {
                 reject(new ParameterTypeError(`dataName must be a string, not a ${typeof dataName}`));
@@ -267,11 +267,11 @@ class ElStorage {
 
                 if (databaseData === null) {
                     // Handle non-existent data
-                    reject(new NonexistentDataError(`${dataName} data does not exist!`));
+                    reject(new NonexistentDatabaseError(`${dataName} data does not exist!`));
                     return;
                 }
                 // Resolve with retrieved data
-                resolve(data);
+                resolve(databaseData);
 
             } catch (err) {
                 // Handle any errors during parsing or retrieval
@@ -287,7 +287,7 @@ class ElStorage {
      * @param {string} [pathName] 
      */
     store(dataName, dataString, pathName = "/") {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (typeof dataName !== 'string') {
                 reject(new ParameterTypeError(`dataName must be a string, not a ${typeof databaseName}`));
             }
@@ -298,14 +298,20 @@ class ElStorage {
         })
     }
 
-    _updateProperty(dataName, data) {
-        return new Promise(async (resolve, reject) => {
+    /**
+     * 
+     * @param {string} dataName 
+     * @param {any} data 
+     * @returns 
+     */
+    _updateProperty() {
+        return new Promise((resolve, reject) => {
             if (typeof databaseName !== 'string') {
                 reject(new ParameterTypeError(`databaseName must be a string, not a ${typeof databaseName}`));
                 return;
             }
 
-            let databaseData = await this.getDatabase(this.databaseName);
+            // let databaseData = await this.getDatabase(this.databaseName);
 
 
         })
@@ -316,7 +322,7 @@ class ElStorage {
      * @param {string} dataName
      */
     deleteData(dataName) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (typeof dataName !== 'string') {
                 reject(new ParameterTypeError(`dataName must be a string, not a ${typeof dataName}`));
             }
@@ -336,7 +342,7 @@ class ElStorage {
         })
     }
 
-    async clearEverything(dataName) {
+    async clearEverything() {
         // Add admin functionality and stuff
         console.log(`You are not permitted to use this function!`);
     }
@@ -365,7 +371,7 @@ class ElStorage {
 
 
             // Split the path to get the folders
-            steps = pathString.split(/[\/\\]/);
+            let steps = pathString.split(/[/\\]/);
 
             // Pass obj into a temporary variable
             let dataObj = obj;
@@ -421,12 +427,12 @@ class ElStorage {
             let isValidPath = validatePath(path);
             if (path === "/" && !isValidPath) isValidPath = true;
             if (!isValidPath) {
-                reject(new Error(`Please provide a valid path. Path provided: ${pathString}`));
+                reject(new Error(`Please provide a valid path. Path provided: ${path}`));
                 return;
             }
 
             // Split the path to get the folders
-            let pathParts = path.split(/[\/\\]/);
+            let pathParts = path.split(/[/\\]/);
 
             // Pass obj into a temporary variable
             // console.log(this.databaseData, "setPropertyByPath()")
@@ -475,13 +481,14 @@ class ElStorage {
      * @returns 
      */
     createNewModel(modelName, modelPath) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (typeof dataName !== 'string') {
                 reject(new ParameterTypeError(`modelName must be a string, not a ${typeof modelName}`));
                 return;
             }
+            let a = modelPath;
+            console.log(a)
 
-            resolve(new ElStorageModel(this.databaseName, modelName, modelPath))
         })
     }
 }

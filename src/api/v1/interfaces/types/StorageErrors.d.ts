@@ -17,7 +17,7 @@ interface _ApplicationError {
 
 interface _DatabaseError extends ApplicationError {
   // constructor(message: string, name: DatabaseErrorNames, severity: _ErrorSeverity);
-  handleError(error: class);
+  handleError(): void;
 }
 
 // * Database Error Class

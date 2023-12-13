@@ -14,13 +14,13 @@ class ApplicationError extends Error implements _ApplicationError {
 }
 
 // * DATABASE ERROR CLASS
-export class DatabaseError extends ApplicationError {
+export class DatabaseError extends ApplicationError implements _DatabaseError {
     constructor(message: string, name: DatabaseErrorNames, level: _ErrorLevel) {
         super(message, name, level);
     }
-    
+
     handleError(): void {
-        let messageLog = {
+        const messageLog = {
             message: this.message,
             data: { name: this.name, level: this.level }
         }

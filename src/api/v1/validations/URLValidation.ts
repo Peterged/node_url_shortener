@@ -1,4 +1,4 @@
-const { z } = require('zod');
+import { z } from 'zod'
 
 const URISchema = z.object({
     targetUrl: z.string().url({ message: "Invalid url"}).required(),

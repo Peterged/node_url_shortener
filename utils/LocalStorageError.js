@@ -19,6 +19,7 @@ class ApplicationError extends Error {
     constructor(message, type, severity) {
         super(message);
         this.type = type;
+        this.type = severity
     }
 
     handleError(error) {
@@ -120,4 +121,4 @@ class NetworkError extends ApplicationError {}
 
 
 
-module.exports = { ApplicationError, NonexistentDatabaseError, NonexistentDataError, ParameterTypeError, ErrorSeverity }
+module.exports = { ApplicationError, NetworkError, NonexistentDatabaseError, NonexistentDataError, ParameterTypeError, ErrorSeverity }

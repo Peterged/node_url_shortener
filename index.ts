@@ -4,7 +4,7 @@ import express from 'express'
 const app: Express = express();
 import path from 'path'
 import bodyParser from 'body-parser'
-import flash from 'express-flash-message'
+// import flash from 'express-flash-message'
 
 
 // VIEW ENGINE SET
@@ -22,17 +22,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.urlencoded({
     extended: true
 }))
-
-// Needs Session
-// app.use(
-//     flash.default({
-//         sessionKeyName: 'express-flash-message',
-//         // below are optional property you can pass in to track
-//         onAddFlash: (type, message) => { },
-//         onConsumeFlash: (type, messages) => { },
-//     })
-// );
-
 
 // Port
 const port = process.env.POST || 4040;

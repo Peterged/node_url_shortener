@@ -1,9 +1,6 @@
 import winston from 'winston';
 const { combine, timestamp, json, printf } = winston.format;
 
-// Import Types
-import type { ElStorageObject } from '../api/v1/interfaces/types/ElStorage';
-
 // Timestamp Declaration
 const timestampFormat = 'MMM-DD-YYYY HH:mm:ss';
 
@@ -23,6 +20,7 @@ export const logger = winston.createLogger({
         json(),
         printf(({ timestamp, level, message, ...data }: winston.Logform.TransformableInfo): string => {
             const response = {
+                timestamp,
                 level, 
                 message,
                 data, // metadata
@@ -35,7 +33,7 @@ export const logger = winston.createLogger({
 export const formatHTTPLoggerResponse = (
     req: Request,
     res: Response,
-    responseBody: any
+    responseBody?: any
  ) => {
     return {
         request: {

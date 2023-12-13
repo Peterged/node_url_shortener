@@ -1,5 +1,6 @@
-const ElStorage = require('../utils/ElStorage');
-const path = require('path');
+import ElStorage from '../utils/ElStorage';
+import path from 'path'
+
 
 console.log(path.join("data", 'images/icons'));
 (async () => {
