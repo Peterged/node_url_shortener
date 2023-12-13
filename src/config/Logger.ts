@@ -32,8 +32,7 @@ export const logger = winston.createLogger({
 
 export const formatHTTPLoggerResponse = (
     req: Request,
-    res: Response,
-    responseBody?: any
+    res: Response
  ) => {
     return {
         request: {

@@ -2,12 +2,12 @@ import { ElStorageInterface } from '@src/api/v1/interfaces/types'
 import type { ElStorageLog, ElStorageObject } from '../interfaces/types/ElStorage';
 import { DatabaseError } from './StorageErrors'
 import { logger } from '@/src/config/Logger';
+import { LocalStorage as NodeLocalStorage } from 'node-localstorage'
+const LocalStorage: NodeLocalStorage = new NodeLocalStorage('./based');
 
-
-if (typeof localStorage === "undefined" || localStorage === null) {
-    
-    var LocalStorage: Storage = import 'node-localstorage'
-}
+// if (typeof localStorage === "undefined" || localStorage === null) {
+//     LocalStorage = new NodeLocalStorage('./based');
+// }
 
 const initialData: ElStorageObject = {
     name: '',
