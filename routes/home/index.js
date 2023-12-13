@@ -4,12 +4,20 @@ const assert = require('assert');
 
 
 
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
+    const originRes = res;
     res.render('home', {
         welcomeMessage: 'This is the Landing Page'
     });
+    
+    setTimeout(() => {
+        console.log('redirected');
 
-    console.log(req)
+        originRes.redirect(301, '/auth/login')
+
+    }, 1000)
+    next();
+    
 })
 
 // STATUS ERROR CODE HANDLING

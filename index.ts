@@ -1,8 +1,11 @@
-const express = require('express');
-const app = express();
-const path = require('path');
-const bodyParser = require('body-parser');
-const flash = require('express-flash-message');
+import { NextFunction, Request, Response, Express } from "express";
+
+import express from 'express'
+const app: Express = express();
+import path from 'path'
+import bodyParser from 'body-parser'
+import flash from 'express-flash-message'
+
 
 // VIEW ENGINE SET
 app.set('view engine', 'ejs');
@@ -35,11 +38,10 @@ app.use(bodyParser.urlencoded({
 const port = process.env.POST || 4040;
 
 
-// Import Controllers
-const users = require('./routes/users');
-const auth = require('./routes/auth')
-const home = require('./routes/home')
-
+// Import Controllers\
+import users from './routes/users';
+import auth from './routes/auth';
+import home from './routes/home';
 // STATIC FILES (Images, etc)
 // app.use('/static', express.static(path.join(__dirname, 'public')))
 
@@ -49,13 +51,25 @@ app.use('/users', users);
 app.use('/auth', auth);
 app.use('/', home);
 
-app.all('/', (req, res, next) => {
-    // 404
-    res.status(404).render('errors/404');
-})
+app.all('/', (req: Request, res: Response, next: NextFunction) => {
 
+    // 404
+    res.render('errors/404');
+    next();
+})
 
 // Starting App
 app.listen(port, () => {
     console.log(`Listening to port ${port}`);
 })
+
+// declare global {
+//     namespace MyTypes {
+//         export type AddRequired<Type, Key extends keyof Type> = Type & {
+//             [Property in Key]-?: Type[Property]
+//         };
+//     }
+// }
+
+export {}
+

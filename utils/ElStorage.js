@@ -23,13 +23,13 @@ class ElStorage {
         try {
             this.setDatabaseName(databaseName);
             (async () => {
-                let currentData = await this.getDatabase();
+                
 
                 if (!await this.databaseExists(databaseName)) {
                     await this.createDatabase(databaseName);
                 }
 
-                this.setDatabaseData(currentData);
+                
 
                 console.log('ElStorage Initialized');
             })();
@@ -161,12 +161,13 @@ class ElStorage {
      */
     updateDatabase(databaseData) {
         return new Promise(async (resolve, reject) => {
-            if (typeof databaseData !== 'string') {
-                reject(new ParameterTypeError(`databaseData must be a string, not a ${typeof databaseData}`));
+            if (typeof databaseData !== 'object') {
+                reject(new ParameterTypeError(`databaseData must be a object, not a ${typeof databaseData}`));
                 return;
             }
             databaseData['updatedOn'] = new Date().toJSON();
             this.databaseData = databaseData;
+            localStorage.setItem(this.getDatabaseName(), JSON.stringify(databaseData));
             resolve({ message: 'Successfully Updated Database!', data: databaseData });
         })
     }
@@ -226,7 +227,7 @@ class ElStorage {
     };
 
     async getAllKeys() {
-        
+
         const keys = [];
         const queue = [this.getDatabaseData()];
 
@@ -290,7 +291,6 @@ class ElStorage {
             if (typeof dataName !== 'string') {
                 reject(new ParameterTypeError(`dataName must be a string, not a ${typeof databaseName}`));
             }
-
 
             // Need to add function to write data through path
             let result = await this.setPropertyByPath(pathName, dataName, dataString);
@@ -407,8 +407,8 @@ class ElStorage {
     setPropertyByPath = (path, propertyName, propertyData, dataObject = {}) => {
 
         if (JSON.stringify(dataObject) === '{}') {
-
-            console.log(this.databaseData, "setPropertyByPath()");
+            dataObject = this.getDatabaseData();
+            // console.log(this.databaseData, "setPropertyByPath()");
         }
 
         return new Promise((resolve, reject) => {
@@ -433,9 +433,8 @@ class ElStorage {
 
             let dataObj = dataObject;
             if (path !== '/') {
-                dataObj 
-                for (const step of steps) {
-                    dataObj = dataObj[step];
+                dataObj = dataObject['data'];
+                for (const part of pathParts) {
                     if (!dataObj[part]) {
                         dataObj[part] = {};
                     }
@@ -443,11 +442,16 @@ class ElStorage {
                         break;
                     }
                 }
+                dataObj['data'][propertyName] = propertyData;
+                dataObject['data'] = dataObj;
             }
             else {
                 dataObj['data'][propertyName] = propertyData;
             }
-            this.updateDatabase(dataObj);
+            // this.updateDatabase(dataObj);
+
+            // Update the data in the localStorage
+            // localStorage.setItem(this.getDatabaseName(), JSON.stringify(dataObj));
 
             if (dataObj !== null) {
                 resolve({
@@ -482,39 +486,39 @@ class ElStorage {
     }
 }
 
-class ElStorageModel {
-    constructor(databaseName, modelName, modelPath) {
-        if (typeof databaseName !== 'string' || typeof modelName !== 'string') {
-            throw new ParameterTypeError(`Both databaseName and modelName must be a string!`);
-        }
+// class ElStorageModel {
+//     constructor(databaseName, modelName, modelPath) {
+//         if (typeof databaseName !== 'string' || typeof modelName !== 'string') {
+//             throw new ParameterTypeError(`Both databaseName and modelName must be a string!`);
+//         }
 
 
 
-        this.path = modelPath;
-        this.databaseName = databaseName;
-        this.modelName = modelName;
-    }
+//         this.path = modelPath;
+//         this.databaseName = databaseName;
+//         this.modelName = modelName;
+//     }
 
-    async store(dataName, data, path) {
-        return new Promise(async (resolve, reject) => {
-            let databaseData = await this.getDatabase(this.databaseName);
-
-
-        })
+//     async store(dataName, data, path) {
+//         return new Promise(async (resolve, reject) => {
+//             let databaseData = await this.getDatabase(this.databaseName);
 
 
-        if (typeof data_name !== 'string') throw new RangeError('data_name must be a string!');
-        let exists = localStorage.setItem(data_name, data);
-        if (exists) {
-            console.log('Data exists and is overwritten!');
-        }
-    }
-}
+//         })
 
-// Pass in functions from ElStorage class to the ElStorageModel class
-// To reduce code length
-Object.assign(ElStorageModel.prototype, { setPropertyByPath: ElStorage.prototype.setPropertyByPath })
-Object.assign(ElStorageModel.prototype, { findPropertyByPath: ElStorage.prototype.findPropertyByPath })
-Object.assign(ElStorageModel.prototype, { getDatabase: ElStorage.prototype.getDatabase })
+
+//         if (typeof data_name !== 'string') throw new RangeError('data_name must be a string!');
+//         let exists = localStorage.setItem(data_name, data);
+//         if (exists) {
+//             console.log('Data exists and is overwritten!');
+//         }
+//     }
+// }
+
+// // Pass in functions from ElStorage class to the ElStorageModel class
+// // To reduce code length
+// Object.assign(ElStorageModel.prototype, { setPropertyByPath: ElStorage.prototype.setPropertyByPath })
+// Object.assign(ElStorageModel.prototype, { findPropertyByPath: ElStorage.prototype.findPropertyByPath })
+// Object.assign(ElStorageModel.prototype, { getDatabase: ElStorage.prototype.getDatabase })
 
 module.exports = ElStorage;
