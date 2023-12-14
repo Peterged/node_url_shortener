@@ -2,16 +2,15 @@ import { logger } from '@/src/config/Logger';
 import DatabaseError from '../helpers/DatabaseError';
 import ElStorage from '../helpers/ElStorage';
 
-type DecoratedFunction<T> = (...args: unknown[]) => T | void;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const handleError = (target: any) => {
+  const Original = target;
 
-const handleError = <T>(value: DecoratedFunction<T>, context: PropertyDescriptor)
-  : typeof ElStorage => {
-  const newContext = context;
-  const originalMethod = context.value;
-  newContext.value = (...args: unknown[]): ElStorage => {
-    let result;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function newConstructor(...args: any[]) {
+    let instance;
     try {
-      result = originalMethod.apply(this, args);
+      instance = new Original(...args);
     } catch (err) {
       if (err instanceof DatabaseError) {
         err.handleError();
@@ -19,9 +18,11 @@ const handleError = <T>(value: DecoratedFunction<T>, context: PropertyDescriptor
         logger.error(err);
       }
     }
-    return result;
-  };
-  return newContext as typeof ElStorage;
+    return instance;
+  }
+
+  newConstructor.prototype = Original.prototype;
+  return newConstructor;
 };
 
 export default handleError;

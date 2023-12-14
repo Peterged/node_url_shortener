@@ -9,6 +9,7 @@ import { logger } from '@/src/config/Logger.ts';
 
 // Decorators
 import handleError from '../decorators/handleError';
+import validatePerson from '../decorators/testDecorator';
 
 const LocalStorage: NodeLocalStorage = new NodeLocalStorage('./based');
 
@@ -24,7 +25,7 @@ const initialData: ElStorageObject = {
   data: {},
 };
 
-@handleError
+@validatePerson
 class ElStorage implements ElStorageInterface {
   // Variables
   private databaseName: string = '';
@@ -52,7 +53,7 @@ class ElStorage implements ElStorageInterface {
       }
 
       this.databaseName = databaseName;
-      this.databaseData = databaseData || initialData;
+    //   this.databaseData = databaseData || initialData;
 
       if (_data) {
         this._data = _data;
