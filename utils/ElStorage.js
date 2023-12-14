@@ -184,11 +184,9 @@ class ElStorage {
             }
             let exists = JSON.parse(localStorage.getItem(databaseName));
             if (exists !== null) {
-                // console.log(`Database ${databaseName} exist!`);
                 resolve(true);
             }
             else {
-                // console.log(`Database ${databaseName} does not exist!`);
                 resolve(false);
             }
         })

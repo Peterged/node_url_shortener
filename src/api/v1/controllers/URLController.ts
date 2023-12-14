@@ -1,4 +1,4 @@
-import express from 'express'
+import express from 'express';
 // import { Request, Response, NextFunction } from 'express'
 const router = express.Router();
 
@@ -7,7 +7,5 @@ const router = express.Router();
 // router.post('/create/:uri', validateURL, (req: Request, res: Response) => {
 
 // })
-
-
 
 export default router;
