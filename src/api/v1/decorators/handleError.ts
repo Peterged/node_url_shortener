@@ -1,16 +1,13 @@
-import { logger } from '@/src/config/Logger';
+import { logger } from '@/src/config/logger';
 import DatabaseError from '../helpers/DatabaseError';
-import ElStorage from '../helpers/ElStorage';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const handleError = (target: any) => {
-  const Original = target;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function newConstructor(...args: any[]) {
+const handleError = <T extends { new (...args: any[]): object }> (constructor: T) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  function newConstructor(...args: unknown[]) {
     let instance;
     try {
-      instance = new Original(...args);
+      instance = new constructor(...args);
     } catch (err) {
       if (err instanceof DatabaseError) {
         err.handleError();
@@ -20,9 +17,6 @@ const handleError = (target: any) => {
     }
     return instance;
   }
-
-  newConstructor.prototype = Original.prototype;
-  return newConstructor;
 };
 
 export default handleError;

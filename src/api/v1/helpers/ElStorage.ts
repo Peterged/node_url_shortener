@@ -1,125 +1,117 @@
-import { ElStorageInterface } from '@src/api/v1/interfaces/types';
+import { ElstorageInterface } from '@src/api/v1/interfaces/types';
 import { LocalStorage as NodeLocalStorage } from 'node-localstorage';
 import type {
-  ElStorageLog,
-  ElStorageObject,
-} from '../interfaces/types/ElStorage';
+  ElstorageLog,
+  ElstorageObject,
+} from '../interfaces/types/Elstorage';
 import DatabaseError from './DatabaseError';
-import { logger } from '@/src/config/Logger.ts';
+import logger from '@/src/config/logger';
 
 // Decorators
-import handleError from '../decorators/handleError';
-import validatePerson from '../decorators/testDecorator';
 
 const LocalStorage: NodeLocalStorage = new NodeLocalStorage('./based');
+    
 
-// if (typeof localStorage === "undefined" || localStorage === null) {
-//     LocalStorage = new NodeLocalStorage('./based');
-// }
+    
+import handleError from '../decorators/handleError';
+declare module 'elstorage' {
+    import elstorage = require('elstorage');
 
-const initialData: ElStorageObject = {
-  databaseName: '',
-  createdOn: '', // new Date().toJSON()
-  updatedOn: '', // new Date().toJSON()
-  totalKeys: 0,
-  data: {},
-};
+    
+    
+    
+    const initialData = {
+        databaseName: '',
+        createdOn: '', // new Date().toJSON()
+        updatedOn: '', // new Date().toJSON()
+        totalKeys: 0,
+        data: {},
+    } satisfies ElstorageObject;
 
-@validatePerson
-class ElStorage implements ElStorageInterface {
-  // Variables
-  private databaseName: string = '';
-
-  private databaseData: ElStorageObject = initialData;
-
-  private _data: ElStorageObject | object = {};
-
-  // Messages and Stuff
-  private message = {
-    SUCCESS: 'Successfully completed process',
-    FAILED: 'Something wrong happened',
-  } as const;
-
-  // Constructor
-  private constructor(databaseName: string, _data?: ElStorageObject | object) {
-    try {
-      const databaseData = this.getDatabaseSync(databaseName);
-      if (!databaseData) {
-        logger.info(
-          `Database ${databaseName} not found! Creating a new database...`,
-          { data: initialData },
-        );
-        this.createDatabase(databaseName);
-      }
-
-      this.databaseName = databaseName;
-    //   this.databaseData = databaseData || initialData;
-
-      if (_data) {
-        this._data = _data;
-      }
-    } catch (err: unknown) {
-      if (err instanceof DatabaseError) {
-        err.handleError();
-      } else {
-        console.error(err);
-      }
-    }
-  }
-
-  protected async createDatabase(
-    databaseName: string,
-  ): Promise<ElStorageLog> {
-    try {
-      const storedData = this.getDatabaseSync(databaseName);
-      const isObjectEmpty = !!Object.keys(storedData).length;
-      if (!isObjectEmpty) {
-        throw new DatabaseError(
-          '',
-          DatabaseErrorType.NON_EXISTENT_DATABASE,
-          ErrorLevel.ERROR,
-        );
-      }
-      const returnedData = isObjectEmpty ? storedData : '';
-    } catch (err: unknown) {
-      if (err instanceof DatabaseError) {
-        err.handleError();
-      }
+    @handleError
+    export class Schema implements ElstorageSchemaInterface {
+        constructor<T = any>(definition: ):  {
+            
+        }
     }
 
-    return returnedData;
-  }
+    
+    @handleError
+    export class Elstorage implements ElstorageInterface {
+        // Variables
+        private databaseName: string = '';
+  private databaseData: ElstorageObject = initialData;
+  private _data: ElstorageObject | object = {};
+    
 
-  protected createDatabaseSync(
-    databaseName: string,
-  ): ElStorageLog {
-    let returnedData: ElStorageObject | undefined;
+    private message = {
+        SUCCESS: 'Successfully completed process',
+        FAILED: 'Something wrong happened',
+      } as const;
 
-    try {
-      const storedData = this.getDatabaseSync(databaseName);
-      const isObjectEmpty = !!Object.keys(storedData).length;
-      returnedData = isObjectEmpty ? storedData : '';
-    } catch (err: unknown) {
-      if (err instanceof DatabaseError) {
-        err.handleError();
-      } else {
-        logger.error(err);
+
+      public constructor(databaseName: string, _data?: ElstorageObject | object) {
+        try {
+          const databaseData = this.getDatabaseSync(databaseName);
+          if (!databaseData) {
+            logger.info(
+              `Database ${databaseName} not found! Creating a new database...`,
+              { data: initialData },
+            );
+            this.createDatabase(databaseName);
+          }
+    
+          this.databaseName = databaseName;
+        //   this.databaseData = databaseData || initialData;
+    
+          if (_data) {
+            this._data = _data;
+          }
+        } catch (err: unknown) {
+          if (err instanceof DatabaseError) {
+            err.handleError();
+          } else {
+            console.error(err);
+          }
+        }
       }
-    }
-    return {
-      message: this.message.SUCCESS,
-      data: returnedData,
-    };
-  }
 
-  /**
+      public async createDatabase(
+        databaseName: string,
+      ): Promise<ElstorageLog | string> {
+        let returnedData: ElstorageObject | string = '';
+    
+        try {
+          const storedData = this.getDatabaseSync(databaseName);
+          const isObjectEmpty = !!Object.keys(storedData).length;
+          if (!isObjectEmpty) {
+            throw new DatabaseError(
+              '',
+              DatabaseErrorType.NON_EXISTENT_DATABASE,
+              ErrorLevel.ERROR,
+            );
+          }
+          returnedData = isObjectEmpty ? storedData : '';
+        } catch (err: unknown) {
+          if (err instanceof DatabaseError) {
+            err.handleError();
+          }
+        }
+    
+        return {
+            message: this.message.SUCCESS,
+            data: returnedData
+        };
+      }
+
+        /**
      * synchronize database data with a new one
      *
      * @param databaseData
      */
-  protected async updateDatabase(
-    databaseData: ElStorageObject | object,
-  ): Promise<ElStorageLog> {
+  public async updateDatabase(
+    databaseData: ElstorageObject | object,
+  ): Promise<ElstorageLog> {
     // const oldData = this.databaseData;
     try {
       if (typeof databaseData === 'object') {
@@ -138,9 +130,10 @@ class ElStorage implements ElStorageInterface {
     return { message: 'a' };
   }
 
-  protected updateDatabaseSync(
-    databaseData: ElStorageObject | object,
-  ): ElStorageLog {
+
+  public updateDatabaseSync(
+    databaseData: ElstorageObject | object,
+  ): ElstorageLog {
     try {
       if (typeof databaseData === 'object') {
         this.databaseData.data = databaseData;
@@ -158,12 +151,12 @@ class ElStorage implements ElStorageInterface {
     return { message: '', data: this.databaseData };
   }
 
-  protected async getDatabase(
+  public async getDatabase(
     databaseName: string = this.databaseName,
-  ): Promise<ElStorageLog | undefined> {
+  ): Promise<ElstorageLog | undefined> {
     // Sets databaseName from class if undefined
 
-    let databaseData: ElStorageObject | undefined;
+    let databaseData: ElstorageObject | undefined;
 
     try {
       /** Get Stored Items */
@@ -196,9 +189,12 @@ class ElStorage implements ElStorageInterface {
     };
   }
 
-  protected getValue(path: string, key: string) { }
 
-  protected getValueByFilter(
+
+  public getValue(path: string, key: string) { }
+
+
+  public getValueByFilter(
     path: string,
     callback: (key: string, value: unknown) => boolean,
   ): Promise<object[] | object> {
@@ -214,11 +210,10 @@ class ElStorage implements ElStorageInterface {
     }
   }
 
-  //! SYNC FUNCTIONS
-  protected getDatabaseSync(
+  public getDatabaseSync(
     databaseName: string = this.databaseName,
-  ): ElStorageObject | string {
-    let databaseData: ElStorageObject | string = '';
+  ): ElstorageObject | string {
+    let databaseData: ElstorageObject | string = '';
 
     try {
       const storedData = LocalStorage.getItem(databaseName) || undefined;
@@ -242,14 +237,16 @@ class ElStorage implements ElStorageInterface {
     return databaseData;
   }
 
-  protected getValueByFilterSync(
+
+
+  public getValueByFilterSync(
     path: string,
     callback: (key: string, value: unknown) => boolean,
   ): object[] | object { 
 
   }
 
-  public async writeValue(key: string, value: unknown, pathToObject: string = '/'): Promise<ElStorageLog> {
+  public async writeValue(key: string, value: unknown, pathToObject: string = '/'): Promise<ElstorageLog> {
 
     try {
         const storedData = this.getValue(pathToObject, key);
@@ -272,7 +269,7 @@ class ElStorage implements ElStorageInterface {
     }
   }
 
-  public writeValueSync(key: string, value: unknown, pathToObject: string = '/'): ElStorageLog {
+  public writeValueSync(key: string, value: unknown, pathToObject: string = '/'): ElstorageLog {
     try {
         const storedData = this.
     }
@@ -290,12 +287,12 @@ class ElStorage implements ElStorageInterface {
     try
   }
 
-  public async updateValue(key: string, value: unknown): Promise<ElStorageLog> { }
-  public updateValueSync(key: string, value: unknown): ElStorageLog {
+  public async updateValue(key: string, value: unknown): Promise<ElstorageLog> { }
+  public updateValueSync(key: string, value: unknown): ElstorageLog {
 
   }
 
-  public async deleteValue(key: string, pathToProperty: string): ElStorageLog {
+  public async deleteValue(key: string, pathToProperty: string): ElstorageLog {
     try{
 
     }
@@ -309,7 +306,7 @@ class ElStorage implements ElStorageInterface {
     }
   }
 
+    }
 
+    
 }
-
-export default ElStorage;

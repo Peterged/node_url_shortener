@@ -7,7 +7,7 @@ const {
 // Timestamp Declaration
 const timestampFormat = 'MMM-DD-YYYY HH:mm:ss';
 
-export const logger = winston.createLogger({
+const logger = winston.createLogger({
   transports: [
     new winston.transports.Console(),
     new winston.transports.File({ filename: '../../info.log', level: 'info' }),
@@ -34,7 +34,7 @@ export const logger = winston.createLogger({
   ),
 });
 
-export const formatHTTPLoggerResponse = (
+const formatHTTPLoggerResponse = (
   req: Request,
   res: Response,
 ) => ({
@@ -50,4 +50,6 @@ export const formatHTTPLoggerResponse = (
   },
 });
 
+export default logger;
+export { formatHTTPLoggerResponse };
 // export { logger, formatHTTPLoggerResponse }

@@ -1,5 +1,5 @@
-import { logger } from '@src/config/Logger';
 import ApplicationError from './ApplicationError';
+import logger from '@/src/config/logger';
 
 // * DATABASE ERROR CLASS
 class DatabaseError extends ApplicationError implements DatabaseErrorInterface {

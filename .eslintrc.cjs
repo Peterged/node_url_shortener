@@ -7,7 +7,8 @@ module.exports = {
         'airbnb-typescript'
     ],
     rules: {
-        "no-console": "off"
+        "no-console": "off",
+        'import/no-namespace': 'off',
     },
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint'],

@@ -1,3 +1,3 @@
 export default './URLShortener';
 export * from './StorageErrors';
-export { default as ElStorageInterface } from './ElStorage';
+export { default as ElstorageInterface } from './Elstorage';

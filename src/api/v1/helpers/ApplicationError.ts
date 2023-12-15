@@ -1,4 +1,4 @@
-class ApplicationError extends Error implements ApplicationErrorInterface {
+abstract class ApplicationError extends Error implements ApplicationErrorInterface {
   level: ErrorLevels;
 
   public constructor(message: string, name: string, level: ErrorLevels) {

@@ -7,7 +7,7 @@ if (typeof localStorage === "undefined" || localStorage === null) {
     var localStorage = new LocalStorage('./based');
 }
 
-class ElStorage {
+class Elstorage {
     databaseData = {}
     databaseName;
 
@@ -31,7 +31,7 @@ class ElStorage {
 
                 
 
-                console.log('ElStorage Initialized');
+                console.log('Elstorage Initialized');
             })();
         } catch (err) {
             console.error(err);
@@ -491,7 +491,7 @@ class ElStorage {
     }
 }
 
-// class ElStorageModel {
+// class ElstorageModel {
 //     constructor(databaseName, modelName, modelPath) {
 //         if (typeof databaseName !== 'string' || typeof modelName !== 'string') {
 //             throw new ParameterTypeError(`Both databaseName and modelName must be a string!`);
@@ -520,10 +520,10 @@ class ElStorage {
 //     }
 // }
 
-// // Pass in functions from ElStorage class to the ElStorageModel class
+// // Pass in functions from Elstorage class to the ElstorageModel class
 // // To reduce code length
-// Object.assign(ElStorageModel.prototype, { setPropertyByPath: ElStorage.prototype.setPropertyByPath })
-// Object.assign(ElStorageModel.prototype, { findPropertyByPath: ElStorage.prototype.findPropertyByPath })
-// Object.assign(ElStorageModel.prototype, { getDatabase: ElStorage.prototype.getDatabase })
+// Object.assign(ElstorageModel.prototype, { setPropertyByPath: Elstorage.prototype.setPropertyByPath })
+// Object.assign(ElstorageModel.prototype, { findPropertyByPath: Elstorage.prototype.findPropertyByPath })
+// Object.assign(ElstorageModel.prototype, { getDatabase: Elstorage.prototype.getDatabase })
 
-module.exports = ElStorage;
+module.exports = Elstorage;
