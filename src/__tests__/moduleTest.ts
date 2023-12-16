@@ -10,9 +10,9 @@
 // }
 
 declare module 'hi' {
-    import hi from 'hi'
-    
-    function set() {
-        console.log('set');
-    }
+  import hi from 'hi';
+
+  function set() {
+    console.log('set');
+  }
 }

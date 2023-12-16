@@ -1,6 +1,6 @@
 declare module 'elstorage' {
-    import elstorage = require('elstorage');
-    
+  import elstorage = require('elstorage');
+
     type ElstorageLog = {
       message: string,
       data?: ElstorageObject | string,

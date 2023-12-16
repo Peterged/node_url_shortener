@@ -1,7 +1,12 @@
-import mongoose from 'mongoose'
+import elstorage from 'elstorage';
 
-const User = new mongoose.Schema({
-    user: String
+import mongoose from 'mongoose';
+
+const UserBlueprint = new elstorage.Blueprint({
+  username: { type: String },
 });
 
-const UserModel = mongoose.model('UserModel', User);
+const UserImplementation = elstorage.implement('User', User);
+
+const UserSchema = new mongoose.Schema();
+

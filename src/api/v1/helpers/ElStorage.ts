@@ -37,11 +37,11 @@ declare module 'elstorage' {
 
     
     @handleError
-    export class Elstorage implements ElstorageInterface {
+    export class Elstorage<ElstorageInterface> {
         // Variables
         private databaseName: string = '';
-  private databaseData: ElstorageObject = initialData;
-  private _data: ElstorageObject | object = {};
+        private databaseData: ElstorageObject = initialData;
+        private _data: ElstorageObject | object = {};
     
 
     private message = {
@@ -103,6 +103,7 @@ declare module 'elstorage' {
             data: returnedData
         };
       }
+      
 
         /**
      * synchronize database data with a new one
@@ -113,20 +114,12 @@ declare module 'elstorage' {
     databaseData: ElstorageObject | object,
   ): Promise<ElstorageLog> {
     // const oldData = this.databaseData;
-    try {
       if (typeof databaseData === 'object') {
         this.databaseData.data = databaseData;
       } else {
         this.databaseData = databaseData;
       }
-    } catch (err: unknown) {
-      if (err instanceof DatabaseError) {
-        err.handleError();
-      } else {
-        logger.error(err);
-      }
-    }
-
+    
     return { message: 'a' };
   }
 
@@ -134,21 +127,15 @@ declare module 'elstorage' {
   public updateDatabaseSync(
     databaseData: ElstorageObject | object,
   ): ElstorageLog {
-    try {
+    
       if (typeof databaseData === 'object') {
         this.databaseData.data = databaseData;
       } else {
         this.databaseData = databaseData;
       }
-    } catch (err: unknown) {
-      if (err instanceof DatabaseError) {
-        err.handleError();
-      } else {
-        logger.error(err);
-      }
-    }
+    
 
-    return { message: '', data: this.databaseData };
+    return { message: this.message.SUCCESS, data: this.databaseData };
   }
 
   public async getDatabase(
@@ -158,7 +145,7 @@ declare module 'elstorage' {
 
     let databaseData: ElstorageObject | undefined;
 
-    try {
+    
       /** Get Stored Items */
       const storedData = LocalStorage.getItem(databaseName) || undefined;
 
@@ -175,13 +162,7 @@ declare module 'elstorage' {
 
       /** Parse the data if it exists */
       databaseData = storedData ? JSON.parse(databaseData || '') : undefined;
-    } catch (err: unknown) {
-      if (err instanceof DatabaseError) {
-        err.handleError();
-      } else {
-        logger.error(err);
-      }
-    }
+    
 
     return {
       message: this.message.SUCCESS,
@@ -199,15 +180,7 @@ declare module 'elstorage' {
     callback: (key: string, value: unknown) => boolean,
   ): Promise<object[] | object> {
     const foundData: Array<unknown> = [];
-    try {
-
-    } catch (err: unknown) {
-      if (err instanceof DatabaseError) {
-        err.handleError();
-      } else {
-        logger.error(err);
-      }
-    }
+    
   }
 
   public getDatabaseSync(
@@ -215,7 +188,7 @@ declare module 'elstorage' {
   ): ElstorageObject | string {
     let databaseData: ElstorageObject | string = '';
 
-    try {
+    
       const storedData = LocalStorage.getItem(databaseName) || undefined;
       databaseData = storedData ? JSON.parse(databaseData || '') : undefined;
 
@@ -226,13 +199,7 @@ declare module 'elstorage' {
           ErrorLevel.ERROR,
         );
       }
-    } catch (err: unknown) {
-      if (err instanceof DatabaseError) {
-        err.handleError();
-      } else {
-        logger.error(err);
-      }
-    }
+    
 
     return databaseData;
   }
@@ -248,18 +215,10 @@ declare module 'elstorage' {
 
   public async writeValue(key: string, value: unknown, pathToObject: string = '/'): Promise<ElstorageLog> {
 
-    try {
+    
         const storedData = this.getValue(pathToObject, key);
-    }
-    catch(err) {
-        if(err instanceof DatabaseError) {
-            err.handleError();
-        }
-        else {
-            logger.error(err);
-        }
-    }
-
+    
+    
     return {
         message: this.message.SUCCESS,
         data: {
@@ -270,17 +229,10 @@ declare module 'elstorage' {
   }
 
   public writeValueSync(key: string, value: unknown, pathToObject: string = '/'): ElstorageLog {
-    try {
+    
         const storedData = this.
-    }
-    catch(err) {
-        if(err instanceof DatabaseError) {
-            err.handleError();
-        }
-        else {
-            logger.error(err);
-        }
-    }
+    
+    
   }
 
   public async getValue(path: string, key: string): Promise<object | object[]> {
@@ -293,20 +245,28 @@ declare module 'elstorage' {
   }
 
   public async deleteValue(key: string, pathToProperty: string): ElstorageLog {
-    try{
-
-    }
-    catch(err) {
-        if(err instanceof DatabaseError) {
-            err.handleError();
-        }
-        else {
-            logger.error(err);
-        }
-    }
+    
   }
 
     }
 
+    export class Blueprint<ElStorageInterface> {
+        
+    }
+
+    class SchemaTypeOptions<T, EnforcePaperType = any> {
+        type?:
+        T extends string ? 
+    }
+
+    declare class NativeDate extends global.Date { }
+
+    export type NumberBlueprintDefinition = typeof Number | 'number' | 'Number';
+    export type StringBlueprintDefinition = typeof String | 'string' | 'String';
+    export type BooleanBlueprintDefinition = typeof Boolean | 'boolean' | 'Boolean';
+    export type DateBlueprintDefinition = typeof NativeDate | 'number' | 'Number';
+    export type ObjectIdBlueprintDefinition = 'ObjectId' | 'ObjectID';
+
+    
     
 }
