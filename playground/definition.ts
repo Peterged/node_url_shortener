@@ -1,0 +1,1 @@
+import estorage from 'estorage';

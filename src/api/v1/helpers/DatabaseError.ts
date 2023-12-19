@@ -36,7 +36,7 @@ class DatabaseError extends ApplicationError implements DatabaseErrorInterface {
         break;
 
       default:
-        logger.silly('DatabaseErrorType doesn\'t match you silly :v');
+        logger.error(`Unhandled DatabaseErrorType: ${this.name}`);
         break;
     }
   }

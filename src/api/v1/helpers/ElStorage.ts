@@ -28,13 +28,6 @@ declare module 'elstorage' {
         data: {},
     } satisfies ElstorageObject;
 
-    @handleError
-    export class Schema implements ElstorageSchemaInterface {
-        constructor<T = any>(definition: ):  {
-            
-        }
-    }
-
     
     @handleError
     export class Elstorage<ElstorageInterface> {
@@ -228,16 +221,16 @@ declare module 'elstorage' {
     }
   }
 
-  public writeValueSync(key: string, value: unknown, pathToObject: string = '/'): ElstorageLog {
+//   public writeValueSync(key: string, value: unknown, pathToObject: string = '/'): ElstorageLog {
     
-        const storedData = this.
+//         const storedData = this.
     
     
-  }
+//   }
 
-  public async getValue(path: string, key: string): Promise<object | object[]> {
-    try
-  }
+//   public async getValue(path: string, key: string): Promise<object | object[]> {
+//     try
+//   }
 
   public async updateValue(key: string, value: unknown): Promise<ElstorageLog> { }
   public updateValueSync(key: string, value: unknown): ElstorageLog {
@@ -254,10 +247,15 @@ declare module 'elstorage' {
         
     }
 
-    class SchemaTypeOptions<T, EnforcePaperType = any> {
-        type?:
-        T extends string ? 
-    }
+    // class BlueprintTypeOptions<T, EnforcePaperType = any> {
+    //     type?:
+    //     T extends string ? StringBlueprintDefinition :
+    //       T extends number ? NumberBlueprintDefinition :
+    //         T extends boolean ? BooleanBlueprintDefinition : 
+    //           T extends NativeDate ? DateBlueprintDefinition : 
+    //             T extends ElTypes.ObjectId ? ObjectIdBlueprintDefinition : 
+    //               T extends object[] ? (AnyArray<>)
+    // }
 
     declare class NativeDate extends global.Date { }
 
@@ -265,8 +263,96 @@ declare module 'elstorage' {
     export type StringBlueprintDefinition = typeof String | 'string' | 'String';
     export type BooleanBlueprintDefinition = typeof Boolean | 'boolean' | 'Boolean';
     export type DateBlueprintDefinition = typeof NativeDate | 'number' | 'Number';
+    export type ArrayBlueprintDefinition = typeof Array | 'array' | 'Array';
+    export type ObjectBlueprintDefinition = typeof Object | 'Object' | 'object';
     export type ObjectIdBlueprintDefinition = 'ObjectId' | 'ObjectID';
 
+    type AllTypes = 
+    | NumberBlueprintDefinition 
+    | StringBlueprintDefinition
+    | BooleanBlueprintDefinition
+    | DateBlueprintDefinition
+    | ObjectBlueprintDefinition
+    | ArrayBlueprintDefinition
+    | ObjectIdBlueprintDefinition
+
+    export type DefaultTypeDefinition<Type> = {
+        type: AllTypes;
+        timestamps?: boolean;
+        description: string;
+        required?: boolean;
+        constraints?: (value: Type) => boolean;
+    }
+
+    export type NumberTypeDefinition = {
+        type: NumberBlueprintDefinition;
+        default?: number;
+        min?: number;
+        max?: number;
+    } & DefaultTypeDefinition<number>
+
+    export type StringDefinition<
+        T extends string,
+    > = {
+        title: string,
+        default?: T;
+        maxLength?: PositiveInteger;
+        minLength?: PositiveInteger;
+        format?: RegExp;
+        enum?: T[];
+        transform?: (value: T) => T;
+        constraints?: (value: T) => boolean;
+        nullable?: boolean;
+    }
+
+    type PositiveInteger = number & {
+        [key: string]: never;
+    }
+
+    type StringProperty<T extends string> = StringDefinition<T> & {
+        type: StringBlueprintDefinition
+    } & DefaultTypeDefinition<T>
+
+    export type BooleanTypeDefinition = {
+        type: BooleanBlueprintDefinition;
+        default?: boolean;
+    }
+
+    export type DateTypeDefinition = {
+        type: DateBlueprintDefinition;
+        default?: Date;
+        format?: "iso8601" | "unix";
+        minimum?: Date;
+        maximum?: Date;
+        locale?: string;
+        pattern?: string;
+        constraints?: (date: Date) => boolean;
+        immutable?: boolean;
+        nullable?: boolean;
+        description: string;
+        timestamps?: boolean;
+    }
+
+    export type AllTypeDefinition = 
+    | NumberTypeDefinition
+    | StringTypeDefinition
+    | BooleanTypeDefinition
+    | DateTypeDefinition
+    & DefaultTypeDefinition
+
+
+    // For gathering the types
+    export type RefType = 
+    | number
+    | string  
+    | Buffer
+    | undefined
+    | ElTypes.ObjectId
+
+    type AnyArray<T> = T[] | readonly T[];
     
-    
+
+    export type BlueprintDefinition<T = undefined, EnforcedPaperType = any> =
+    | { [key: string]: AllTypes}
+    | { [key: string]: }}
 }

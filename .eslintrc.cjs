@@ -9,6 +9,7 @@ module.exports = {
     rules: {
         "no-console": "off",
         'import/no-namespace': 'off',
+        "@typescript-eslint/no-namespace": "off"
     },
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint'],

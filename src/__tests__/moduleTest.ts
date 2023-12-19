@@ -8,11 +8,3 @@
 //     $ignore(path: string): boolean;
 //   }
 // }
-
-declare module 'hi' {
-  import hi from 'hi';
-
-  function set() {
-    console.log('set');
-  }
-}
