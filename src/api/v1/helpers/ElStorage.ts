@@ -267,7 +267,7 @@ declare module 'elstorage' {
     export type ObjectBlueprintDefinition = typeof Object | 'Object' | 'object';
     export type ObjectIdBlueprintDefinition = 'ObjectId' | 'ObjectID';
 
-    type AllTypes = 
+    type AllTypesDefinition = 
     | NumberBlueprintDefinition 
     | StringBlueprintDefinition
     | BooleanBlueprintDefinition
@@ -277,7 +277,7 @@ declare module 'elstorage' {
     | ObjectIdBlueprintDefinition
 
     export type DefaultTypeDefinition<Type> = {
-        type: AllTypes;
+        type: AllTypesDefinition;
         timestamps?: boolean;
         description: string;
         required?: boolean;

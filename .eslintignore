@@ -1,0 +1,4 @@
+# PLAYGROUND TYPES FOLDER
+playground/blueprintTypes/*.ts
+playground/blueprintTypes/*.d.ts
+playground/personal/*.ts

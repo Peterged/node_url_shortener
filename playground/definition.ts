@@ -1,1 +1,0 @@
-import estorage from 'estorage';

@@ -1,15 +1,15 @@
-import estorage, { StringType } from 'estorage';
+import estorage, { AllTypes } from 'estorage';
 import { Model } from 'mongoose';
 
-type BlueprintType =
-| { [x: string]: BlueprintTypes }
-| { [x: string]: { type: BlueprintTypes & StringType } };
+// type BlueprintTypeOptions<T> = T extends { type: infer U } ? U : never;
 
-type BlueprintTypes = estorage.AllType;
+// type BlueprintDefinition =
+// | { [x: string]: AllTypes }
+// | { [x: string]: { type: AllTypes } };
 
 class Blueprint<
-T extends Record<string, BlueprintTypes>,
-TDefinition = estorage.EventsConfigToDiscriminatedUnion<T>,
+T extends Record<string, AllTypes>,
+TDefinition = estorage.BlueprintToDiscriminatedUnion<T>,
 > {
   constructor(private definition: TDefinition) {
     this.definition = definition;
@@ -22,8 +22,8 @@ TDefinition = estorage.EventsConfigToDiscriminatedUnion<T>,
 }
 
 const implement = <
-T extends Record<string, estorage.AllType>,
-TDefinition = estorage.EventsConfigToDiscriminatedUnion<T>,
+T extends Record<string, estorage.AllTypes>,
+TDefinition = estorage.BlueprintToDiscriminatedUnion<T>,
 >(blueprintName: string, blueprint: Blueprint<T, TDefinition>): Model<TDefinition> => {
   console.log(blueprintName, blueprint);
 };
